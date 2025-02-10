@@ -15,6 +15,7 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import com.example.wallotaku.domain.models.ImageModel
 import com.example.wallotaku.domain.usecase.GetImagesUseCase
+import com.example.wallotaku.utils.categories
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,15 +34,41 @@ class WallpaperScreenViewModel(
 
     var selectedImage by mutableStateOf<ImageModel?>(null)
 
+    private var _additionalTags = MutableStateFlow("")
+    val additionalTags: StateFlow<String> get() = _additionalTags
+
+    private var _blacklistedTags = MutableStateFlow("")
+    val blacklistedTags: StateFlow<String> get() = _blacklistedTags
+
+    private val _showAdditionalCategoryDialog = MutableStateFlow(false)
+    val showAdditionalCategoryDialog: StateFlow<Boolean> get() = _showAdditionalCategoryDialog
+
+    private val _showBlacklistedCategoryDialog = MutableStateFlow(false)
+    val showBlacklistedCategoryDialog: StateFlow<Boolean> get() = _showBlacklistedCategoryDialog
+
+    var additionalTagsTagsSelectedCategories = mutableStateOf(setOf<String>())
+    var blacklistedTagsSelectedCategories = mutableStateOf(setOf<String>())
+
+
     init {
         loadImages()
     }
 
     fun loadImages() {
         viewModelScope.launch {
+
             try {
-                val fetchedImages = getImagesUseCase.invoke()
-                _images.value += fetchedImages
+                val fetchedImages = getImagesUseCase.invoke(_additionalTags.value.ifEmpty { categories.joinToString(",") }, _blacklistedTags.value).distinctBy { it.id }
+
+                val currentList = _images.value.toMutableList()
+                val newImages = fetchedImages.filter { newImage ->
+                    currentList.none { it.id == newImage.id }
+                }
+
+                if (newImages.isNotEmpty()) {
+                    _images.value += newImages
+                }
+
             } catch (e: Exception) {
                 println("Ошибка при запросе: $e")
                 e.printStackTrace()
@@ -87,6 +114,37 @@ class WallpaperScreenViewModel(
         }
 
         return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+    }
+
+    fun reLoadImages(){
+        _images.value = emptyList()
+        loadImages()
+    }
+
+    fun openAdditionalCategoryDialog() {
+        _showAdditionalCategoryDialog.value = true
+    }
+
+    fun closeAdditionalCategoryDialog() {
+        _showAdditionalCategoryDialog.value = false
+    }
+
+    fun onAdditionalCategorySelected(categories: String) {
+        _additionalTags.value = categories
+        _showAdditionalCategoryDialog.value = false
+    }
+
+    fun openBlacklistedCategoryDialog() {
+        _showBlacklistedCategoryDialog.value = true
+    }
+
+    fun closeBlacklistedCategoryDialog() {
+        _showBlacklistedCategoryDialog.value = false
+    }
+
+    fun onBlacklistedCategorySelected(categories: String) {
+        _blacklistedTags.value = categories
+        _showBlacklistedCategoryDialog.value = false
     }
 
 }

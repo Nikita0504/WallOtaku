@@ -4,10 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -26,9 +24,11 @@ import androidx.compose.ui.unit.dp
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.wallotaku.presentation.theme.backgroundColor
-import com.example.wallotaku.presentation.wallpaper_screen.widgets.DialogWindow
+import com.example.wallotaku.presentation.wallpaper_screen.widgets.CategoriesDialogWindow
+import com.example.wallotaku.presentation.wallpaper_screen.widgets.WallpaperDialogWindow
 import com.example.wallotaku.presentation.wallpaper_screen.widgets.DrawerContent
 import com.example.wallotaku.presentation.wallpaper_screen.widgets.WallpaperCard
+import com.example.wallotaku.utils.categories
 
 @Composable
 fun WallpaperScreen(viewModel: WallpaperScreenViewModel) {
@@ -36,6 +36,13 @@ fun WallpaperScreen(viewModel: WallpaperScreenViewModel) {
     val selectedImage = viewModel.selectedImage
     val context = LocalContext.current
     val state = rememberLazyGridState()
+
+    val additionalTags by viewModel.additionalTags.collectAsState()
+    val blacklistedTags by viewModel.blacklistedTags.collectAsState()
+
+    val showAdditionalCategoryDialog by viewModel.showAdditionalCategoryDialog.collectAsState()
+
+    val showBlacklistedCategoryDialog by viewModel.showBlacklistedCategoryDialog.collectAsState()
 
     LaunchedEffect(state) {
         snapshotFlow { state.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
@@ -49,7 +56,15 @@ fun WallpaperScreen(viewModel: WallpaperScreenViewModel) {
 
     ModalNavigationDrawer(
         drawerContent = {
-            DrawerContent()
+            DrawerContent(
+                additionalTags = additionalTags,
+                blacklistedTags = blacklistedTags,
+                onAdditionalTags = { viewModel.openAdditionalCategoryDialog() },
+                onBlacklistedTags = { viewModel.openBlacklistedCategoryDialog()},
+                onConfirm = {
+                    viewModel.reLoadImages()
+                },
+            )
         }
     ) {
         Box(
@@ -83,7 +98,7 @@ fun WallpaperScreen(viewModel: WallpaperScreenViewModel) {
                     .setHeader("Cache-Control", "max-age=31536000")
                     .build()
 
-                DialogWindow(
+                WallpaperDialogWindow(
                     image = selectedImage,
                     onClose = { viewModel.onOpenOrDismissDialog(null) },
                     onSetWallpaper = {
@@ -92,8 +107,41 @@ fun WallpaperScreen(viewModel: WallpaperScreenViewModel) {
                     request = request
                 )
             }
+
+            if (showAdditionalCategoryDialog) {
+                CategoriesDialogWindow(
+                    categories = categories,
+                    onSave = { selectedCategories ->
+                        if(selectedCategories.isEmpty()){
+                            viewModel.onAdditionalCategorySelected(categories.joinToString(","))
+                        }
+                        else{
+                            viewModel.onAdditionalCategorySelected(selectedCategories.joinToString(","))
+                        }
+
+                    },
+                    selectedCategories = viewModel.additionalTagsTagsSelectedCategories,
+                    onDismissRequest = {
+                        viewModel.closeAdditionalCategoryDialog()
+                    }
+
+                )
+            }
+
+            if (showBlacklistedCategoryDialog) {
+                CategoriesDialogWindow(
+                    categories = categories,
+                    onSave = { selectedCategories ->
+                        viewModel.onBlacklistedCategorySelected(selectedCategories.joinToString(","))
+                    },
+                    selectedCategories = viewModel.blacklistedTagsSelectedCategories,
+                    onDismissRequest = {
+                        viewModel.closeBlacklistedCategoryDialog()
+                    }
+
+                )
+            }
+
         }
     }
-
-
 }

@@ -4,7 +4,7 @@ import com.example.wallotaku.domain.models.ImageModel
 import com.example.wallotaku.domain.repository.ImageRepository
 
 class GetImagesUseCase(private val repository: ImageRepository) {
-    suspend fun invoke(): List<ImageModel> {
-        return repository.fetchImages()
+    suspend fun invoke(additionalTags: String, blacklistedTags: String): List<ImageModel> {
+        return repository.fetchImages(additionalTags, blacklistedTags)
     }
 }

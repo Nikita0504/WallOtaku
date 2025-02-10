@@ -1,6 +1,5 @@
 package com.example.wallotaku.presentation.wallpaper_screen.widgets
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,19 +24,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.wallotaku.domain.models.ImageModel
+import com.example.wallotaku.presentation.theme.pacificoFontFamily
 
 @Composable
-fun DialogWindow(image: ImageModel, onClose: () -> Unit, onSetWallpaper: () -> Unit, request: ImageRequest) {
+fun WallpaperDialogWindow(image: ImageModel, onClose: () -> Unit, onSetWallpaper: () -> Unit, request: ImageRequest) {
 
     Dialog(
         onDismissRequest = onClose,
@@ -97,11 +95,11 @@ fun DialogWindow(image: ImageModel, onClose: () -> Unit, onSetWallpaper: () -> U
                         }
                     )
                 }
-                Text("Category: ${image.category}", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text("Tags: ${image.tags.joinToString(", ")}", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Rating: ${image.rating}", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Anime: ${image.anime.title ?: "Неизвестно"}", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Text("Character: ${image.anime.character ?: "Неизвестно"}", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("Category: ${image.category}", color = Color.White, fontSize = 16.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
+                Text("Tags: ${image.tags.joinToString(", ")}", color = Color.White, fontSize = 14.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
+                Text("Rating: ${image.rating}", color = Color.White, fontSize = 14.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
+                Text("Anime: ${image.anime.title}", color = Color.White, fontSize = 14.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
+                Text("Character: ${image.anime.character}", color = Color.White, fontSize = 14.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
 
 
                 Button(
@@ -125,7 +123,7 @@ fun DialogWindow(image: ImageModel, onClose: () -> Unit, onSetWallpaper: () -> U
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Apply", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("Apply", color = Color.White, fontSize = 16.sp, fontFamily = pacificoFontFamily, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

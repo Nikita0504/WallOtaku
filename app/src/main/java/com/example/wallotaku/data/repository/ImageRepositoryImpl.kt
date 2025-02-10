@@ -13,11 +13,16 @@ import com.example.wallotaku.domain.repository.ImageRepository
 class ImageRepositoryImpl(
     private val apiService: UnsplashApiService
 ) : ImageRepository {
-    override suspend fun fetchImages(): List<ImageModel> {
-        val response = apiService.getImages()
+    override suspend fun fetchImages(additionalTags: String, blacklistedTags: String): List<ImageModel> {
+        val response = apiService.getImages(
+            count = 48,
+            additionalTags = additionalTags,
+            blacklistedTags = blacklistedTags
+        )
         val images = response.images
 
         return images.map { imageItem ->
+
             ImageModel(
                 id = imageItem.id,
                 image = Image(
@@ -41,7 +46,7 @@ class ImageRepositoryImpl(
                 colors = Colors(
                     main = imageItem.colors.main,
                     palette = imageItem.colors.palette
-                )
+                ),
             )
         }
     }
